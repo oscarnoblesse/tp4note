@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:sqflite/sqflite.dart';
-
+import'/pages/pageAccueil.dart';
 void main() {
   runApp(MyApp());
 }
@@ -15,21 +15,6 @@ class MyApp extends StatelessWidget {
   }
 }
 
-Future<Database> openDatabase() async {
-  return openDatabase(
-    join(await getDatabasesPath(), 'example_database.db'),
-    onCreate: (db, version) {
-      // Création de la première table
-      db.execute(
-        "CREATE TABLE table1(id INTEGER PRIMARY KEY, name TEXT, value INTEGER)",
-      );
-      // Création de la deuxième table
-      db.execute(
-        "CREATE TABLE table2(id INTEGER PRIMARY KEY, title TEXT, description TEXT)",
-      );
-    },
-    version: 1,
-  );
-}
+
 
 

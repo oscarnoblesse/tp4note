@@ -15,9 +15,9 @@ class AccueilPage extends StatelessWidget {
           children: [
             Expanded(
               child: Image.asset(
-                'assets/nombreAccueil.jpg', // Chemin de votre image
-                width: 200, // Largeur de l'image
-                height: 200, // Hauteur de l'image
+                'images/nombreAccueil.jpg', // Chemin de votre image
+                width: 600, // Largeur de l'image
+                height: 600, // Hauteur de l'image
               ),
             ),
             Row(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-import 'dart:core';
 
 class pageJoueur extends StatefulWidget {
   @override
@@ -11,19 +10,51 @@ class _MyHomePageState extends State<pageJoueur> {
   final TextEditingController _numberController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   int _counter = 0;
+  int _triesLeft = 30; // Essais initiaux
   String _topText = '';
   int _randomNumber = 0;
+  int _minNumber = 0;
+  int _maxNumber = 6; // Intervalle initial
   int _nombreNiveau = 1;
+  int _initialTries = 30; // Nombre d'essais initial
 
   @override
   void initState() {
     super.initState();
-    // Initialisation de _randomNumber avec un nombre aléatoire entre 0 et 100000
-    _randomNumber = Random().nextInt(10^_nombreNiveau);
+    _generateRandomNumber();
+  }
+
+  void _generateRandomNumber() {
+    _randomNumber = Random().nextInt(_maxNumber - _minNumber) + _minNumber;
   }
 
   @override
   Widget build(BuildContext context) {
+    if (_triesLeft <= 0) {
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('Game Over'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'Game Over',
+                style: TextStyle(fontSize: 24),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context); // Retour à la fenêtre d'accueil
+                },
+                child: Text('Retour'),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Page avec Popup'),
@@ -34,10 +65,18 @@ class _MyHomePageState extends State<pageJoueur> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-                Text(
-                  _topText,
-                  style: TextStyle(fontSize: 18),
-                ),
+              Text(
+                'Interval: $_minNumber - $_maxNumber',
+                style: TextStyle(fontSize: 18),
+              ),
+              Text(
+                'Essais restants: $_triesLeft', // Affichage du nombre d'essais restants
+                style: TextStyle(fontSize: 18),
+              ),
+              Text(
+                _topText,
+                style: TextStyle(fontSize: 18),
+              ),
               TextFormField(
                 controller: _numberController,
                 keyboardType: TextInputType.number,
@@ -55,7 +94,6 @@ class _MyHomePageState extends State<pageJoueur> {
               ElevatedButton(
                 onPressed: () {
                   if (_numberController.text != "") {
-
                     _incrementCounter(_numberController.text);
                   }
                 },
@@ -89,9 +127,21 @@ class _MyHomePageState extends State<pageJoueur> {
             ),
             ElevatedButton(
               onPressed: () {
-                _nombreNiveau = _nombreNiveau*10;
+                _nombreNiveau++;
+                _minNumber = 0;
+                _maxNumber = 6 * _nombreNiveau; // Augmenter l'intervalle de 6 par 6
+                _generateRandomNumber();
+                // Réinitialiser le nombre d'essais avec la logique appropriée
+                if (_triesLeft > 10) {
+                  _initialTries -= 5;
+                } else {
+                  _initialTries -= 2;
+                }
+                _triesLeft = _initialTries;
                 Navigator.pop(context); // Fermer la boîte de dialogue
-                initState();
+                setState(() {
+                  _topText = '';
+                });
               },
               child: Text('Oui'),
             ),
@@ -100,24 +150,24 @@ class _MyHomePageState extends State<pageJoueur> {
       },
     );
   }
+
   void _incrementCounter(String text) {
     setState(() {
       _counter += 1;
       _numberController.clear();
-      if(_randomNumber < int.parse(text)){
+      int guessedNumber = int.parse(text);
+      _triesLeft--; // Décrémenter le nombre d'essais à chaque tentative
+      if (_randomNumber < guessedNumber) {
         _topText = "Trop grand";
-      }
-      else if(_randomNumber > int.parse(text)){
+        _maxNumber = guessedNumber;
+      } else if (_randomNumber > guessedNumber) {
         _topText = "Trop petit";
-      }
-      else if(_randomNumber == int.parse(text)){
-        _topText = "Bien jouer tu est trop fort";
+        _maxNumber = _maxNumber; // Garder le maximum inchangé
+        _minNumber = guessedNumber; // Mettre à jour seulement le minimum
+      } else if (_randomNumber == guessedNumber) {
+        _topText = "Bien jouer tu es trop fort";
         _showPropositionNextLevel(context);
       }
-
     });
   }
-
-
-
 }
