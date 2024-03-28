@@ -10,6 +10,7 @@ class _MyHomePageState extends State<pageJoueur> {
   final TextEditingController _numberController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   int _counter = 0;
+  int _totalTries = 0; // Compteur total d'essais
   int _triesLeft = 30; // Essais initiaux
   String _topText = '';
   int _randomNumber = 0;
@@ -17,6 +18,7 @@ class _MyHomePageState extends State<pageJoueur> {
   int _maxNumber = 6; // Intervalle initial
   int _nombreNiveau = 1;
   int _initialTries = 30; // Nombre d'essais initial
+  int _notreNombre = 0;
 
   @override
   void initState() {
@@ -26,6 +28,7 @@ class _MyHomePageState extends State<pageJoueur> {
 
   void _generateRandomNumber() {
     _randomNumber = Random().nextInt(_maxNumber - _minNumber) + _minNumber;
+    print(_randomNumber);
   }
 
   @override
@@ -53,11 +56,39 @@ class _MyHomePageState extends State<pageJoueur> {
           ),
         ),
       );
+    } else if (_nombreNiveau == 9 && _randomNumber == _notreNombre) {
+      // Condition pour gagner uniquement lorsque le nombre est trouvé au niveau 9
+      return Scaffold(
+        appBar: AppBar(
+          title: Text('You Won'),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                'You Won!',
+                style: TextStyle(fontSize: 24),
+              ),
+              Text(
+                'Nombre total d\'essais: $_totalTries', // Affichage du nombre total d'essais
+                style: TextStyle(fontSize: 18),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pop(context); // Retour à la fenêtre d'accueil
+                },
+                child: Text('Retour'),
+              ),
+            ],
+          ),
+        ),
+      );
     }
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Page avec Popup'),
+        title: Text('Page avec Popup - Niveau $_nombreNiveau'), // Affichage du niveau actuel dans le titre de l'appBar
       ),
       body: Center(
         child: Padding(
@@ -157,6 +188,8 @@ class _MyHomePageState extends State<pageJoueur> {
       _numberController.clear();
       int guessedNumber = int.parse(text);
       _triesLeft--; // Décrémenter le nombre d'essais à chaque tentative
+      _totalTries++; // Incrémenter le nombre total d'essais
+      _notreNombre = guessedNumber;
       if (_randomNumber < guessedNumber) {
         _topText = "Trop grand";
         _maxNumber = guessedNumber;
@@ -166,8 +199,12 @@ class _MyHomePageState extends State<pageJoueur> {
         _minNumber = guessedNumber; // Mettre à jour seulement le minimum
       } else if (_randomNumber == guessedNumber) {
         _topText = "Bien jouer tu es trop fort";
-        _showPropositionNextLevel(context);
+        if (_nombreNiveau != 9) {
+          _showPropositionNextLevel(context);
+        }
       }
     });
   }
+
+
 }

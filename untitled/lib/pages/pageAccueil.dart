@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'pageJouer.dart';
 import 'pageRegle.dart';
+import 'pageSnake.dart';
+
 
 class AccueilPage extends StatelessWidget {
   @override
@@ -34,6 +36,15 @@ class AccueilPage extends StatelessWidget {
                     // Action à effectuer lorsque le deuxième bouton est pressé
                   },
                   child: Text('score'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => MySnakePage(title: 'Snake Game')),
+                    );
+                  },
+                  child: Text('Snake'),
                 ),
                 ElevatedButton(
                   onPressed: () {
