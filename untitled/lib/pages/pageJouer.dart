@@ -1,12 +1,32 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-
-class pageJoueur extends StatefulWidget {
+import 'package:sqflite/sqflite.dart';
+import 'pageAccueil.dart';
+class PageJoueur extends StatefulWidget {
+  final Future<Database> database;
+  const PageJoueur({Key? key, required this.database}) : super(key: key);
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _PageJoueurState createState() => _PageJoueurState();
 }
 
-class _MyHomePageState extends State<pageJoueur> {
+class _PageJoueurState extends State<PageJoueur> {
+  late Database _database; // Définir le type de la variable _database comme Database
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeDatabase(); // Appeler la méthode _initializeDatabase dans initState
+    _generateRandomNumber();
+  }
+
+  // Méthode pour initialiser la base de données
+  void _initializeDatabase() async {
+    // Attendre que la future database soit terminée et assigner sa valeur à _database
+    _database = await widget.database;
+  }
+
+
+
   final TextEditingController _numberController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   int _counter = 0;
@@ -19,12 +39,6 @@ class _MyHomePageState extends State<pageJoueur> {
   int _nombreNiveau = 1;
   int _initialTries = 30; // Nombre d'essais initial
   int _notreNombre = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _generateRandomNumber();
-  }
 
   void _generateRandomNumber() {
     _randomNumber = Random().nextInt(_maxNumber - _minNumber) + _minNumber;
@@ -45,6 +59,12 @@ class _MyHomePageState extends State<pageJoueur> {
               Text(
                 'Game Over',
                 style: TextStyle(fontSize: 24),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  _showAddScoreDialog(context);
+                },
+                child: Text('Ajouter score'),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -73,6 +93,12 @@ class _MyHomePageState extends State<pageJoueur> {
               Text(
                 'Nombre total d\'essais: $_totalTries', // Affichage du nombre total d'essais
                 style: TextStyle(fontSize: 18),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  _showAddScoreDialog(context); // Lancer la fonction pour afficher la boîte de dialogue
+                },
+                child: Text('Ajouter score'),
               ),
               ElevatedButton(
                 onPressed: () {
@@ -128,7 +154,7 @@ class _MyHomePageState extends State<pageJoueur> {
                     _incrementCounter(_numberController.text);
                   }
                 },
-                child: Text('Ajouter au compteur'),
+                child: Text('Soumettre ce nombre'),
               ),
               SizedBox(height: 20),
               Text(
@@ -182,6 +208,72 @@ class _MyHomePageState extends State<pageJoueur> {
     );
   }
 
+  Future<void> _showAddScoreDialog(BuildContext context) async {
+    TextEditingController _nameController = TextEditingController();
+    TextEditingController _lastNameController = TextEditingController();
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Ajouter un score'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(labelText: 'Nom'),
+                ),
+                TextField(
+                  controller: _lastNameController,
+                  decoration: InputDecoration(labelText: 'Prénom'),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Annuler'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text('Ajouter'),
+              onPressed: () {
+                String name = _nameController.text;
+                String lastName = _lastNameController.text;
+                insertScore(name,lastName,_totalTries,_nombreNiveau,_database);
+
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> insertScore(String nom, String prenom, int score,int niveau ,database) async {
+    final Database db = await database; // Récupération de la référence de la base de données
+
+    // Insertion du score dans la table Score
+    await db.insert(
+      'Score1',
+      {
+        'nom': nom,
+        'prenom': prenom,
+        'nombreCout': score,
+        'niveau' : niveau
+      },
+      conflictAlgorithm: ConflictAlgorithm.replace, // Remplacement en cas de conflit
+    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AccueilPage(database: Future.value(database),)),
+    );
+  }
+
+
   void _incrementCounter(String text) {
     setState(() {
       _counter += 1;
@@ -205,6 +297,4 @@ class _MyHomePageState extends State<pageJoueur> {
       }
     });
   }
-
-
 }

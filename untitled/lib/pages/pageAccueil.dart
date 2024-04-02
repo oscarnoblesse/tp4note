@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'pageJouer.dart';
 import 'pageRegle.dart';
+import 'package:sqflite/sqflite.dart';
+import 'package:path/path.dart';
+import 'scorePage.dart';
 
 
 class AccueilPage extends StatelessWidget {
+  final Future<Database> database;
+  const AccueilPage({Key? key, required this.database}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,13 +32,20 @@ class AccueilPage extends StatelessWidget {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    _showConfirmationDialog(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => PageJoueur(database: database,)),
+                    );
                   },
                   child: Text('jouer'),
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    // Action à effectuer lorsque le deuxième bouton est pressé
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => BestScoresPage(database :database)),
+                    );
+
                   },
                   child: Text('score'),
                 ),
@@ -53,54 +66,7 @@ class AccueilPage extends StatelessWidget {
     );
   }
 
-  void _showConfirmationDialog(BuildContext context) {
-    // Contrôleur pour récupérer la valeur saisie dans le TextField
-    TextEditingController _nameController = TextEditingController();
 
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirmation'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Entrez votre nom et prénom :'),
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  hintText: 'Nom et prénom',
-                ),
-              ),
-            ],
-          ),
-          actions: <Widget>[
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Fermer la boîte de dialogue
-              },
-              child: Text('Annuler'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Ne naviguer vers MyHomePage que lorsque l'utilisateur appuie sur "Oui"
-                Navigator.pop(context); // Fermer la boîte de dialogue
-                _navigateToMyHomePage(context); // Naviguer vers MyHomePage
-              },
-              child: Text('Oui'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _navigateToMyHomePage(BuildContext context) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => pageJoueur()),
-    );
-  }
 }
 
 
