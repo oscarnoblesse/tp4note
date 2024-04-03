@@ -10,7 +10,7 @@ void main() async {
 }
 
 Future<Database> initializeDatabase() async {
-  final path = join(await getDatabasesPath(), 'dataBaseUtilisateur3.db');
+  final path = join(await getDatabasesPath(), 'dataBaseUtilisateur4.db');
   return openDatabase(
     path,
     onCreate: (db, version) async {
@@ -20,6 +20,23 @@ Future<Database> initializeDatabase() async {
           nom TEXT,
           prenom TEXT,
           nombreCout Int,
+          niveau Int
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE historique (
+          id INTEGER PRIMARY KEY,
+          nom TEXT,
+          prenom TEXT,
+          nombreCout Int,
+          niveau Int
+        )
+      ''');
+      await db.execute('''
+        CREATE TABLE rejouer (
+          id INTEGER PRIMARY KEY,
+          nom TEXT,
+          prenom TEXT,
           niveau Int
         )
       ''');

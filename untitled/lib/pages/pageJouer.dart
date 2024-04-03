@@ -4,13 +4,17 @@ import 'package:sqflite/sqflite.dart';
 import 'pageAccueil.dart';
 class PageJoueur extends StatefulWidget {
   final Future<Database> database;
-  const PageJoueur({Key? key, required this.database}) : super(key: key);
+  final String nom;
+  final String prenom;
+  const PageJoueur({Key? key, required this.database,required this.nom,required this.prenom}) : super(key: key);
   @override
   _PageJoueurState createState() => _PageJoueurState();
 }
 
 class _PageJoueurState extends State<PageJoueur> {
   late Database _database; // Définir le type de la variable _database comme Database
+  late String _nom;
+  late String _prenom;
 
   @override
   void initState() {
@@ -23,6 +27,8 @@ class _PageJoueurState extends State<PageJoueur> {
   void _initializeDatabase() async {
     // Attendre que la future database soit terminée et assigner sa valeur à _database
     _database = await widget.database;
+    _nom = await widget.nom;
+    _prenom = await widget.prenom;
   }
 
 
@@ -62,14 +68,24 @@ class _PageJoueurState extends State<PageJoueur> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  _showAddScoreDialog(context);
+                  insertScore(_nom,_prenom,_totalTries,_nombreNiveau,_database);
+                  insertHistorique(_nom,_prenom,_totalTries,_nombreNiveau,_database);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AccueilPage(database: Future.value(_database),)),
+                  );
                 },
                 child: Text('Ajouter score'),
               ),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.pop(context); // Retour à la fenêtre d'accueil
-                },
+                  onPressed: () {
+                    insertHistorique(_nom,_prenom,_totalTries,_nombreNiveau,_database);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AccueilPage(database: Future.value(_database),)),
+                    );
+
+                  },
                 child: Text('Retour'),
               ),
             ],
@@ -96,13 +112,22 @@ class _PageJoueurState extends State<PageJoueur> {
               ),
               ElevatedButton(
                 onPressed: () {
-                  _showAddScoreDialog(context); // Lancer la fonction pour afficher la boîte de dialogue
+                  insertScore(_nom,_prenom,_totalTries,_nombreNiveau,_database);
+                  insertHistorique(_nom,_prenom,_totalTries,_nombreNiveau,_database);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AccueilPage(database: Future.value(_database),)),
+                  );
                 },
                 child: Text('Ajouter score'),
               ),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context); // Retour à la fenêtre d'accueil
+                  insertHistorique(_nom,_prenom,_totalTries,_nombreNiveau,_database);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AccueilPage(database: Future.value(_database),)),
+                  );
                 },
                 child: Text('Retour'),
               ),
@@ -208,57 +233,32 @@ class _PageJoueurState extends State<PageJoueur> {
     );
   }
 
-  Future<void> _showAddScoreDialog(BuildContext context) async {
-    TextEditingController _nameController = TextEditingController();
-    TextEditingController _lastNameController = TextEditingController();
 
-    return showDialog<void>(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Ajouter un score'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                TextField(
-                  controller: _nameController,
-                  decoration: InputDecoration(labelText: 'Nom'),
-                ),
-                TextField(
-                  controller: _lastNameController,
-                  decoration: InputDecoration(labelText: 'Prénom'),
-                ),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            TextButton(
-              child: Text('Annuler'),
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-            ),
-            ElevatedButton(
-              child: Text('Ajouter'),
-              onPressed: () {
-                String name = _nameController.text;
-                String lastName = _lastNameController.text;
-                insertScore(name,lastName,_totalTries,_nombreNiveau,_database);
-
-              },
-            ),
-          ],
-        );
+  Future<void> insertScore(String nom, String prenom, int score,int niveau ,database) async {
+    final Database db = await database; // Récupération de la référence de la base de données
+    // Insertion du score dans la table Score
+    await db.insert(
+      'Score1',
+      {
+        'nom': nom,
+        'prenom': prenom,
+        'nombreCout': score,
+        'niveau' : niveau
       },
+      conflictAlgorithm: ConflictAlgorithm.replace, // Remplacement en cas de conflit
+    );
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => AccueilPage(database: Future.value(database),)),
     );
   }
 
-  Future<void> insertScore(String nom, String prenom, int score,int niveau ,database) async {
+  Future<void> insertHistorique(String nom, String prenom, int score,int niveau ,database) async {
     final Database db = await database; // Récupération de la référence de la base de données
 
     // Insertion du score dans la table Score
     await db.insert(
-      'Score1',
+      'historique',
       {
         'nom': nom,
         'prenom': prenom,

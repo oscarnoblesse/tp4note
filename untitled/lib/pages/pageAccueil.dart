@@ -4,6 +4,7 @@ import 'pageRegle.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import 'scorePage.dart';
+import 'historiqueJoeur.dart';
 
 
 class AccueilPage extends StatelessWidget {
@@ -32,10 +33,7 @@ class AccueilPage extends StatelessWidget {
               children: [
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => PageJoueur(database: database,)),
-                    );
+                    _showAddScoreDialog(context);
                   },
                   child: Text('jouer'),
                 ),
@@ -48,6 +46,12 @@ class AccueilPage extends StatelessWidget {
 
                   },
                   child: Text('score'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    _showAddScoreDialogHistorique(context);
+                  },
+                  child: Text('historique'),
                 ),
                 ElevatedButton(
                   onPressed: () {
@@ -66,7 +70,101 @@ class AccueilPage extends StatelessWidget {
     );
   }
 
+  Future<void> _showAddScoreDialog(BuildContext context) async {
+    TextEditingController _nameController = TextEditingController();
+    TextEditingController _lastNameController = TextEditingController();
 
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Ajouter un score'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(labelText: 'Nom'),
+                ),
+                TextField(
+                  controller: _lastNameController,
+                  decoration: InputDecoration(labelText: 'Prénom'),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Annuler'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text('Ajouter'),
+              onPressed: () {
+                String name = _nameController.text;
+                String lastName = _lastNameController.text;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => PageJoueur(database: database,nom: name,prenom: lastName)),
+                );
+
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _showAddScoreDialogHistorique(BuildContext context) async {
+    TextEditingController _nameController = TextEditingController();
+    TextEditingController _lastNameController = TextEditingController();
+
+    return showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Ajouter un score'),
+          content: SingleChildScrollView(
+            child: Column(
+              children: <Widget>[
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(labelText: 'Nom'),
+                ),
+                TextField(
+                  controller: _lastNameController,
+                  decoration: InputDecoration(labelText: 'Prénom'),
+                ),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: Text('Annuler'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            ElevatedButton(
+              child: Text('Ajouter'),
+              onPressed: () {
+                String name = _nameController.text;
+                String lastName = _lastNameController.text;
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => historiqueScoresPage(database: database,nom: name,prenom: lastName)),
+                );
+
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
 
